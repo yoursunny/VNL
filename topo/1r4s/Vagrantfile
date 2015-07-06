@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ssh_host_port_range = 22001..22006
+
+ssh_host_ports = ssh_host_port_range.to_a
+raise 'too few ssh host ports' unless ssh_host_ports.count >= 6
+
+Vagrant.configure(2) do |config|
+  config.vm.box = 'ubuntu/trusty64'
+
+  config.vm.provider 'virtualbox' do |vb|
+    vb.memory = 512
+    vb.cpus = 2
+  end
+
+  config.vm.define 'gateway' do |host|
+    host.vm.network :forwarded_port, guest: 22, host: ssh_host_ports[0], id: 'ssh'
+    host.vm.network :private_network, ip: '192.168.56.24', virtualbox__intnet: false
+    host.vm.network :private_network, ip: '192.168.49.1', virtualbox__intnet: true
+  end
+
+  config.vm.define 'vrhost' do |host|
+    host.vm.network :forwarded_port, guest: 22, host: ssh_host_ports[1], id: 'ssh'
+    host.vm.network :private_network, ip: '192.168.49.2', virtualbox__intnet: true
+    host.vm.network :private_network, ip: '192.168.49.3', virtualbox__intnet: true
+    host.vm.network :private_network, ip: '192.168.49.4', virtualbox__intnet: true
+    config.vm.provider 'virtualbox' do |vb|
+      vb.cpus = 4
+    end
+  end
+
+  (1..4).each do |n|
+    config.vm.define 'server'+n.to_s do |host|
+      host.vm.network :forwarded_port, guest: 22, host: ssh_host_ports[1+n], id: 'ssh'
+      host.vm.network :private_network, ip: '192.168.49.'+(4+n).to_s, virtualbox__intnet: true
+    end
+  end
+end
