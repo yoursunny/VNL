@@ -19,6 +19,7 @@ if ($mode=='sshconfig') {
     printf("Host %s\n",$tthost->vname);
     printf("  User %s\n",$username);
     list($sshhost,$sshport) = explode(':',$tthost->sshserver);
+    if ($sshhost=='') $sshhost = gethostname();
     printf("  HostName %s\n  Port %d\n",$sshhost,$sshport);
     printf("  IdentityFile vnltopo%d.pvtkey\n",$topoid);
     printf("  LogLevel quiet\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n");
