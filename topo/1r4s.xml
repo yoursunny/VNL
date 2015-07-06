@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<topotemplate name="1r4s">
+  <title>1-router 4-server</title>
+  <range>
+    <topoid min="301" max="363"/>
+    <vip min="172.29.8.32" max="172.29.15.255"/>
+    <udpport min="40001" max="41000" step="3"/>
+    <rtable min="1" max="63" step="1"/>
+  </range>
+  <vip block="/27"/>
+  <host vname="gateway" hostname="gateway" mode="gateway" sshserver=":22001">
+    <if vname="eth0" vip="0.0.0.9/31" tip="192.168.49.1" rtip="192.168.49.2"/>
+    <route dst="0.0.0.0/27" via="0.0.0.8"/>
+  </host>
+  <host vname="vrhost" hostname="vrhost" mode="split" sshserver=":22002">
+    <if vname="eth0" vip="0.0.0.8/31" tip="192.168.49.2" rtip="192.168.49.1"/>
+    <if vname="eth1" vip="0.0.0.6/29" tip="192.168.49.3" rtip="239.207.49.1" udpport="1"/>
+    <if vname="eth2" vip="0.0.0.22/29" tip="192.168.49.4" rtip="239.207.49.2" udpport="2"/>
+  </host>
+  <host vname="server1" hostname="server1" mode="native" sshserver=":22003">
+    <if vname="eth0" vip="0.0.0.1/29" tip="192.168.49.5" rtip="239.207.49.1" udpport="1"/>
+    <route dst="0.0.0.0/27" via="0.0.0.6"/>
+    <route rtable="0" src="0.0.0.1/32" via="0.0.0.6"/>
+  </host>
+  <host vname="server2" hostname="server2" mode="native" sshserver=":22004">
+    <if vname="eth0" vip="0.0.0.2/29" tip="192.168.49.6" rtip="239.207.49.1" udpport="1"/>
+    <route dst="0.0.0.0/27" via="0.0.0.6"/>
+    <route rtable="0" src="0.0.0.2/32" via="0.0.0.6"/>
+  </host>
+  <host vname="server3" hostname="server3" mode="native" sshserver=":22005">
+    <if vname="eth0" vip="0.0.0.19/29" tip="192.168.49.7" rtip="239.207.49.2" udpport="2"/>
+    <route dst="0.0.0.0/27" via="0.0.0.22"/>
+    <route rtable="0" src="0.0.0.19/32" via="0.0.0.22"/>
+  </host>
+  <host vname="server4" hostname="server4" mode="native" sshserver=":22006">
+    <if vname="eth0" vip="0.0.0.20/29" tip="192.168.49.8" rtip="239.207.49.2" udpport="2"/>
+    <route dst="0.0.0.0/27" via="0.0.0.22"/>
+    <route rtable="0" src="0.0.0.20/32" via="0.0.0.22"/>
+  </host>
+  <vnsrtable filename="rtable">
+    <route dst="default" via="0.0.0.9" oif="eth0"/>
+    <route dst="0.0.0.0/29" via="+0.0.0.0" oif="eth1"/>
+    <route dst="0.0.0.16/29" via="+0.0.0.0" oif="eth2"/>
+  </vnsrtable>
+</topotemplate>
