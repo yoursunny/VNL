@@ -43,14 +43,13 @@ fi
 
 if [ $act = 'create' ]
 then
-  groupadd $username
-  useradd -g $username -m -d $userhome -s /bin/bash $username
+  useradd -g vnl -m -d $userhome -s /bin/bash $username
   mkfifo $userhome/vnlsvc.command
   echo 0 > $userhome/vnlsvc.pid
   ln -s $topodataroot/$topoid.sh $userhome/topo.sh
   mkdir $userhome/.ssh
-  mv $topodataroot/$topoid.pvtkey $userhome/.ssh/id_rsa
-  mv $topodataroot/$topoid.pubkey $userhome/.ssh/id_rsa.pub
+  cp $topodataroot/$topoid.pvtkey $userhome/.ssh/id_rsa
+  cp $topodataroot/$topoid.pubkey $userhome/.ssh/id_rsa.pub
   echo -n "command=\"$topodataroot/$topoid.sh sshshell\",no-X11-forwarding,no-agent-forwarding " > $userhome/.ssh/authorized_keys
   cat $userhome/.ssh/id_rsa.pub >> $userhome/.ssh/authorized_keys
   if [ -f $topodataroot/$topoid.tar ]; then rm $topodataroot/$topoid.tar; fi
@@ -72,9 +71,9 @@ then
     foreach ($tthost->ifs as $ttif) {
       $tapname = $toponame.$ttif->vname;
       list($vip,$cidr,$mask) = $ti->resolve_vip($ttif->vip);
-      printf("\t\tip tuntap add dev %s mode tap user \$username\n",$tapname);
-      printf("\t\tip addr add %s/%d dev %s\n",$vip,$cidr,$tapname);
-      printf("\t\tip link set %s up\n",$tapname);
+      printf("    ip tuntap add dev %s mode tap user \$username\n",$tapname);
+      printf("    ip addr add %s/%d dev %s\n",$vip,$cidr,$tapname);
+      printf("    ip link set %s up\n",$tapname);
     }
     foreach ($tthost->routes as $ttroute) {
       list($svip,$scidr,$smask) = $ti->resolve_vip($ttroute->src);
@@ -82,13 +81,13 @@ then
       $via = $ti->resolve_vip($ttroute->via,TRUE);
       if ($ttroute->is_source_route) {
         $rtable = $ti->rtable_base + $ttroute->rtable;
-        printf("\t\tip rule add from %s/%d table %d\n",$svip,$scidr,$rtable);
-        printf("\t\tip route add %s/%d via %s table %d\n",$dvip,$dcidr,$via,$rtable);
+        printf("    ip rule add from %s/%d table %d\n",$svip,$scidr,$rtable);
+        printf("    ip route add %s/%d via %s table %d\n",$dvip,$dcidr,$via,$rtable);
       } else {
-        printf("\t\tip route add %s/%d via %s\n",$dvip,$dcidr,$via);
+        printf("    ip route add %s/%d via %s\n",$dvip,$dcidr,$via);
       }
     }
-    printf("\t\tsudo -u %s /home/vnl/topo/%s.sh run\n",$username,$topoid);
+    printf("    sudo -u %s /home/vnl/topo/%s.sh run\n",$username,$topoid);
 ?>
   fi
 <?php
@@ -109,12 +108,12 @@ then
     foreach ($tthost->routes as $ttroute) {
       if ($ttroute->is_source_route) {
         list($svip,$scidr,$smask) = $ti->resolve_vip($ttroute->src);
-        printf("\t\tip rule del from %s/%d\n",$svip,$scidr);
+        printf("    ip rule del from %s/%d\n",$svip,$scidr);
       }
     }
     foreach ($tthost->ifs as $ttif) {
       $tapname = $toponame.$ttif->vname;
-      printf("\t\tip tuntap del dev %s mode tap\n",$tapname);
+      printf("    ip tuntap del dev %s mode tap\n",$tapname);
     }
 ?>
   fi
@@ -135,7 +134,7 @@ then
   then
 <?php
   foreach ($tt->hosts as $tthost) {
-    printf("\t\tif [ \$hostname = '%s' ]; then vhost=%s; hostmode=%s; fi\n",$tthost->hostname,$tthost->vname,$tthost->mode);
+    printf("    if [ \$hostname = '%s' ]; then vhost=%s; hostmode=%s; fi\n",$tthost->hostname,$tthost->vname,$tthost->mode);
   }
 ?>
     echo [TOPOLOGY CONTROL]
@@ -170,31 +169,31 @@ then
     if [ $vnlsvcpid -gt 0 ]; then ps -F $vnlsvcpid 2>/dev/null; fi
 <?php
     if ($tthost->isNG()) {
-      echo "\t\techo [INTERFACES]\n";
+      echo "    echo [INTERFACES]\n";
       $ifid = -1;
       foreach ($tthost->ifs as $ttif) {
         ++$ifid;
         $tapname = $toponame.$ttif->vname;
-        printf("\t\tifconfig %s | grep . | sed 's/%s//' | sed 's/^\\s\\s\\s\\s\\s//'\n",$tapname,$toponame);
-        printf("\t\tif [ -f \$userhome/%d.lossy ]; then echo '     lossy: '`cat \$userhome/%d.lossy`%%; fi\n",$ifid,$ifid);
+        printf("    ifconfig %s | grep . | sed 's/%s//' | sed 's/^\\s\\s\\s\\s\\s//'\n",$tapname,$toponame);
+        printf("    if [ -f \$userhome/%d.lossy ]; then echo '     lossy: '`cat \$userhome/%d.lossy`%%; fi\n",$ifid,$ifid);
       }
-      echo "\t\techo [ROUTING TABLE]\n";
-      printf("\t\tip route | grep %s[^0-9] | sed 's/%s//'\n",$toponame,$toponame);
+      echo "    echo [ROUTING TABLE]\n";
+      printf("    ip route | grep %s[^0-9] | sed 's/%s//'\n",$toponame,$toponame);
       foreach ($tthost->routes as $ttroute) {
         if ($ttroute->is_source_route) {
           $rtable = $ti->rtable_base + intval($ttroute->rtable);
-          printf("\t\tip route show table %d | sed 's/%s//'\n",$rtable,$toponame);
+          printf("    ip route show table %d | sed 's/%s//'\n",$rtable,$toponame);
         }
       }
     } else {
-      echo "\t\techo [INTERFACES]\n";
+      echo "    echo [INTERFACES]\n";
       $ifid = -1;
       foreach ($tthost->ifs as $ttif) {
         ++$ifid;
-        printf("\t\techo %s\n",$ttif->vname);
-        printf("\t\tif [ -f \$userhome/%d.lossy ]; then echo -n '     lossy: '; echo `cat \$userhome/%d.lossy`%%; fi\n",$ifid,$ifid);
+        printf("    echo %s\n",$ttif->vname);
+        printf("    if [ -f \$userhome/%d.lossy ]; then echo -n '     lossy: '; echo `cat \$userhome/%d.lossy`%%; fi\n",$ifid,$ifid);
       }
-      echo "\t\techo [ROUTING TABLE]\n\t\techo NOT APPLICABLE\n";
+      echo "    echo [ROUTING TABLE]\n    echo NOT APPLICABLE\n";
     }
 ?>
   fi
@@ -237,7 +236,7 @@ then
     } else {
       $cmd = $cmd.' -s';
     }
-    printf("\t\t%s\n",$cmd);
+    printf("    %s\n",$cmd);
 ?>
   fi
 <?php
@@ -262,8 +261,8 @@ then
     if [ $hostname = '<?php echo $tthost->hostname; ?>' -a $ifname = '<?php echo $ttif->vname; ?>' ]
     then
 <?php
-    printf("\t\t\tphp5 \$approot/setlossy.php \$userhome/vnlsvc.command %d \$lossy\n",$ifid);
-    printf("\t\t\techo \$lossy > \$userhome/%d.lossy\n",$ifid);
+    printf("      php5 \$approot/setlossy.php \$userhome/vnlsvc.command %d \$lossy\n",$ifid);
+    printf("      echo \$lossy > \$userhome/%d.lossy\n",$ifid);
 ?>
     fi
 <?php
@@ -287,9 +286,9 @@ then
     foreach ($tthost->ifs as $ttif) {
       $vip = $ti->resolve_vip($ttif->vip,TRUE);
       if (++$ifid == 0) {
-        printf("\t\t\tsrc=%s\n",$vip);
+        printf("      src=%s\n",$vip);
       } else {
-        printf("\t\t\tif [ \"\$ifname\" = '%s' ]; then src=%s; fi\n",$ttif->vname,$vip);
+        printf("      if [ \"\$ifname\" = '%s' ]; then src=%s; fi\n",$ttif->vname,$vip);
       }
     }
 ?>
