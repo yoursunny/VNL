@@ -3,13 +3,12 @@
 require_once 'tt.lib.php';
 
 $tt = new TopoTpl($argv[1]);
-$gateway_ip = $argv[2];
-if (FALSE === ip2long($gateway_ip)) {
-  die('vagrant.php template_file gateway_ip');
-}
 ?>
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+
+gateway_ip = ''
+raise 'missing gateway_ip' unless gateway_ip!=''
 
 Vagrant.configure(2) do |config|
   config.vm.box = 'ubuntu/trusty64'
@@ -29,7 +28,7 @@ foreach ($tt->hosts as $tthost) {
 <?php
   if ($tthost->mode == TopoTplHost::GATEWAY) {
 ?>
-    host.vm.network :private_network, ip: '<?php echo $gateway_ip ?>', virtualbox__intnet: false
+    host.vm.network :private_network, ip: gateway_ip, virtualbox__intnet: false
 <?php
   }
 ?>
