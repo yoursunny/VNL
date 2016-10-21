@@ -53,7 +53,7 @@ then
   echo -n "command=\"$topodataroot/$topoid.sh sshshell\",no-X11-forwarding,no-agent-forwarding " > $userhome/.ssh/authorized_keys
   cat $userhome/.ssh/id_rsa.pub >> $userhome/.ssh/authorized_keys
   if [ -f $topodataroot/$topoid.tar ]; then rm $topodataroot/$topoid.tar; fi
-  chown -R $username:$username $userhome $userhome/.ssh
+  chown -R $username:vnl $userhome $userhome/.ssh
   chmod 755 $userhome/.ssh
   chmod 600 $userhome/.ssh/id_rsa
   chmod 644 $userhome/.ssh/id_rsa.pub $userhome/.ssh/authorized_keys
