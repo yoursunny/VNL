@@ -56,12 +56,6 @@ Vagrant.configure(2) do |config|
     vb.cpus = 4
   end
 
-  config.vm.provision 'shell', inline: provision_script1
-  config.vm.provision 'file', source: '../../guest-apps/vnlsvc/vnlsvc', destination: '/home/vnl/apps/vnlsvc'
-  config.vm.provision 'file', source: '../../guest-apps/udpsum/udpsum', destination: '/home/vnl/apps/udpsum'
-  config.vm.provision 'file', source: '../../guest-apps/setlossy.php', destination: '/home/vnl/apps/setlossy.php'
-  config.vm.provision 'shell', run: 'always', inline: start_script1
-
 <?php
 foreach ($tt->hosts as $tthost) {
   list($sshhost,$sshport) = explode(':',$tthost->sshserver);
@@ -70,21 +64,31 @@ foreach ($tt->hosts as $tthost) {
     host.vm.hostname = '<?php echo $tthost->hostname; ?>'
     host.vm.network :forwarded_port, guest: 22, host: <?php echo $sshport; ?>, id: 'ssh'
 <?php
+  foreach ($tthost->ifs as $i=>$ttif) {
+    if ($i == 0) {
+?>
+    host.vm.network :private_network, ip: '<?php echo $ttif->tunnel_local; ?>', virtualbox__intnet: '<?php echo $tt->name; ?>'
+<?php
+    }
+    else {
+?>
+    host.vm.provision 'shell', run: 'always', inline: 'ip addr add <?php echo $ttif->tunnel_local; ?>/24 dev eth1'
+<?php
+    }
+  }
   if ($tthost->mode == TopoTplHost::GATEWAY) {
 ?>
     host.vm.network :private_network, ip: gateway_ip, virtualbox__intnet: false
 <?php
   }
 ?>
-<?php
-  foreach ($tthost->ifs as $ttif) {
-?>
-    host.vm.network :private_network, ip: '<?php echo $ttif->tunnel_local; ?>', virtualbox__intnet: true
-<?php
-  }
-?>
-  end
 
+    host.vm.provision 'shell', inline: provision_script1
+    host.vm.provision 'file', source: '../../guest-apps/vnlsvc/vnlsvc', destination: '/home/vnl/apps/vnlsvc'
+    host.vm.provision 'file', source: '../../guest-apps/udpsum/udpsum', destination: '/home/vnl/apps/udpsum'
+    host.vm.provision 'file', source: '../../guest-apps/setlossy.php', destination: '/home/vnl/apps/setlossy.php'
+    host.vm.provision 'shell', run: 'always', inline: start_script1
+  end
 <?php
 }
 ?>
