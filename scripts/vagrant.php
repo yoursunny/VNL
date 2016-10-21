@@ -7,7 +7,7 @@ $tt = new TopoTpl($argv[1]);
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-gateway_ip = ''
+gateway_ip = '<?php echo $argv[2]; ?>'
 raise 'missing gateway_ip' unless gateway_ip!=''
 
 provision_script1 = <<EOT
