@@ -1,0 +1,16 @@
+<?php
+//gateway
+drawifip(271,-248,'eth0',9);
+//vrhost
+drawifip(-449,257,'eth0',8);
+drawifip(543,-205,'eth1',6,29);
+drawifip(543,300,'eth2',22,29);
+//server1
+drawifip(-924,-65,'eth0',1,29);
+//server2
+drawifip(-924,194,'eth0',2,29);
+//server3
+drawifip(-924,-332,'eth0',19,29);
+//server4
+drawifip(-924,464,'eth0',20,29);
+?>

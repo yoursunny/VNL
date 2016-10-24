@@ -19,6 +19,9 @@ then
   mv $topoid.pvtkey.pub $topoid.pubkey
 fi
 
+# make topoimage
+php5 $R/scripts/topoimage.php $R/topo/$tt $topoid > $topoid.png
+
 # make user package
 if [ -d vnltopo$topoid ]; then rm -rf vnltopo$topoid; fi
 mkdir vnltopo$topoid
