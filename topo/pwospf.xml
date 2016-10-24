@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<topotemplate name="pwospf">
+  <title>pwospf</title>
+  <range>
+    <topoid min="101" max="163"/>
+    <vip min="172.29.4.16" max="172.29.7.255"/>
+    <udpport min="29101" max="29163"/>
+    <rtable min="1" max="63" step="1"/>
+  </range>
+  <vip block="/28"/>
+  <host vname="gateway" hostname="gateway" mode="gateway" sshserver=":22007">
+    <if vname="eth0" vip="0.0.0.1/30" tip="192.168.49.1" rtip="192.168.49.2"/>
+    <route dst="0.0.0.0/28" via="0.0.0.2"/>
+  </host>
+  <host vname="vhost1" hostname="vhost1" mode="split" sshserver=":22008">
+    <if vname="eth0" vip="0.0.0.2/30" tip="192.168.49.2" rtip="192.168.49.1"/>
+    <if vname="eth1" vip="0.0.0.4/31" tip="192.168.49.3" rtip="192.168.49.5"/>
+    <if vname="eth2" vip="0.0.0.8/31" tip="192.168.49.4" rtip="192.168.49.8"/>
+  </host>
+  <host vname="vhost2" hostname="vhost2" mode="split" sshserver=":22009">
+    <if vname="eth0" vip="0.0.0.5/31" tip="192.168.49.5" rtip="192.168.49.3"/>
+    <if vname="eth1" vip="0.0.0.6/31" tip="192.168.49.6" rtip="192.168.49.11"/>
+    <if vname="eth2" vip="0.0.0.13/30" tip="192.168.49.7" rtip="192.168.49.10"/>
+  </host>
+  <host vname="vhost3" hostname="vhost3" mode="split" sshserver=":22010">
+    <if vname="eth0" vip="0.0.0.9/31" tip="192.168.49.8" rtip="192.168.49.4"/>
+    <if vname="eth1" vip="0.0.0.10/31" tip="192.168.49.9" rtip="192.168.49.12"/>
+    <if vname="eth2" vip="0.0.0.14/30" tip="192.168.49.10" rtip="192.168.49.7"/>
+  </host>
+  <host vname="server1" hostname="server1" mode="native" sshserver=":22011">
+    <if vname="eth0" vip="0.0.0.7/31" tip="192.168.49.11" rtip="192.168.49.6"/>
+    <route dst="0.0.0.0/28" via="0.0.0.6"/>
+    <route rtable="0" src="0.0.0.7/32" via="0.0.0.6"/>
+  </host>
+  <host vname="server2" hostname="server2" mode="native" sshserver=":22012">
+    <if vname="eth0" vip="0.0.0.11/31" tip="192.168.49.12" rtip="192.168.49.9"/>
+    <route dst="0.0.0.0/28" via="0.0.0.10"/>
+    <route rtable="0" src="0.0.0.11/32" via="0.0.0.10"/>
+  </host>
+  <vnsrtable filename="rtable.vhost1">
+    <route dst="default" via="0.0.0.1" oif="eth0"/>
+    <route dst="0.0.0.4/30" via="0.0.0.5" oif="eth1"/>
+    <route dst="0.0.0.8/29" via="0.0.0.9" oif="eth2"/>
+  </vnsrtable>
+  <vnsrtable filename="rtable.vhost2">
+    <route dst="default" via="0.0.0.4" oif="eth0"/>
+    <route dst="0.0.0.7/32" via="0.0.0.7" oif="eth1"/>
+    <route dst="0.0.0.8/29" via="0.0.0.14" oif="eth2"/>
+  </vnsrtable>
+  <vnsrtable filename="rtable.vhost3">
+    <route dst="default" via="0.0.0.8" oif="eth0"/>
+    <route dst="0.0.0.11/32" via="0.0.0.11" oif="eth1"/>
+    <route dst="0.0.0.13/32" via="0.0.0.13" oif="eth2"/>
+    <route dst="0.0.0.4/30" via="0.0.0.13" oif="eth2"/>
+  </vnsrtable>
+  <vnsrtable filename="rtable.net">
+    <route dst="default" via="0.0.0.1" oif="eth0"/>
+  </vnsrtable>
+  <vnsrtable filename="rtable.empty">
+  </vnsrtable>
+</topotemplate>
