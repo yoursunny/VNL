@@ -24,6 +24,46 @@ chown -R vagrant /home/vnl
 #apt-get install -y -qq php5-cli
 EOT
 
+provision_script2 = <<EOT
+apt-get -y install lighttpd php5-cgi vsftpd
+lighty-enable-mod fastcgi fastcgi-php
+
+mkdir /home/vnlappserver/
+
+cd /home/vnlappserver/
+cp -R /home/vnl/apps/www /home/vnl/apps/udpsum ./
+mkdir -p ftproot
+
+cp /home/vnl/apps/lighttpd.conf /etc/lighttpd/lighttpd.conf
+cp /home/vnl/apps/vsftpd.conf /etc/vsftpd.conf
+
+dd if=/dev/urandom of=www/1MB.bin bs=1M count=1
+dd if=/dev/urandom of=www/2MB.bin bs=1M count=2
+dd if=/dev/urandom of=www/4MB.bin bs=1M count=4
+dd if=/dev/urandom of=www/8MB.bin bs=1M count=8
+dd if=/dev/urandom of=www/16MB.bin bs=1M count=16
+dd if=/dev/urandom of=www/32MB.bin bs=1M count=32
+dd if=/dev/urandom of=www/64MB.bin bs=1M count=64
+
+dd if=/dev/urandom of=ftproot/1MB.bin bs=1M count=1
+dd if=/dev/urandom of=ftproot/2MB.bin bs=1M count=2
+dd if=/dev/urandom of=ftproot/4MB.bin bs=1M count=4
+dd if=/dev/urandom of=ftproot/8MB.bin bs=1M count=8
+dd if=/dev/urandom of=ftproot/16MB.bin bs=1M count=16
+dd if=/dev/urandom of=ftproot/32MB.bin bs=1M count=32
+dd if=/dev/urandom of=ftproot/64MB.bin bs=1M count=64
+
+chown -R vnlmaster:vnlmaster ./
+chmod 644 www/* ftproot/*
+
+cp /home/vnl/apps/udpsum.sh /etc/init.d/udpsum
+update-rc.d udpsum defaults
+
+service lighttpd restart
+service vsftpd restart
+service udpsum start
+EOT
+
 start_script1 = <<EOT
 echo 1 > /proc/sys/net/ipv4/ip_forward
 ip link set dev eth1 mtu 2000
@@ -85,6 +125,13 @@ foreach ($tt->hosts as $tthost) {
 
     host.vm.provision 'shell', inline: provision_script1
     host.vm.provision 'file', source: '../../guest-apps/build/apps', destination: '/home/vnl/'
+<?php
+  if ($tthost->mode == TopoTplHost::NATIVE) {
+?>
+    host.vm.provision 'shell', inline: provision_script2
+<?php
+  }
+?>
     host.vm.provision 'shell', run: 'always', inline: start_script1
 <?php
   if ($tthost->mode == TopoTplHost::GATEWAY) {
