@@ -19,13 +19,13 @@ echo 'vnlmaster ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vnlmaster
 mkdir -p /home/vnl/topo
 chown -R vagrant /home/vnl
 
-#apt-get update -qq
-#apt-get dist-upgrade -y -qq
-#apt-get install -y -qq php5-cli
+apt-get update -qq
+apt-get dist-upgrade -y -qq
+apt-get install -y -qq php5-cli
 EOT
 
 provision_script2 = <<EOT
-apt-get -y install lighttpd php5-cgi vsftpd
+apt-get -y -qq install lighttpd php5-cgi vsftpd
 lighty-enable-mod fastcgi fastcgi-php
 
 mkdir /home/vnlappserver/
@@ -109,8 +109,7 @@ foreach ($tt->hosts as $tthost) {
 ?>
     host.vm.network :private_network, ip: '<?php echo $ttif->tunnel_local; ?>', virtualbox__intnet: '<?php echo $tt->name; ?>'
 <?php
-    }
-    else {
+    } else {
 ?>
     host.vm.provision 'shell', run: 'always', inline: 'ip addr add <?php echo $ttif->tunnel_local; ?>/24 dev eth1'
 <?php
