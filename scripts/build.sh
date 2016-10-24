@@ -20,5 +20,5 @@ fi
 cd ..
 
 mkdir -p build/apps build/apps/www
-cp vnlsvc/vnlsvc udpsum/udpsum setlossy.php build/apps/
+cp vnlsvc/vnlsvc setlossy.php udpsum/udpsum udpsum/udpsum.sh *.conf build/apps/
 rsync --verbose --archive --delete -z --copy-links --exclude=.git www/ build/apps/www
