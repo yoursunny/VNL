@@ -16,7 +16,7 @@ useradd -g vnl -s /bin/bash vnlmaster
 mkdir -p /home/vnlmaster
 chown -R vnlmaster /home/vnlmaster
 echo 'vnlmaster ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/vnlmaster
-mkdir -p /home/vnl/apps /home/vnl/topo
+mkdir -p /home/vnl/topo
 chown -R vagrant /home/vnl
 
 #apt-get update -qq
@@ -84,9 +84,7 @@ foreach ($tt->hosts as $tthost) {
 ?>
 
     host.vm.provision 'shell', inline: provision_script1
-    host.vm.provision 'file', source: '../../guest-apps/vnlsvc/vnlsvc', destination: '/home/vnl/apps/vnlsvc'
-    host.vm.provision 'file', source: '../../guest-apps/udpsum/udpsum', destination: '/home/vnl/apps/udpsum'
-    host.vm.provision 'file', source: '../../guest-apps/setlossy.php', destination: '/home/vnl/apps/setlossy.php'
+    host.vm.provision 'file', source: '../../guest-apps/build/apps', destination: '/home/vnl/'
     host.vm.provision 'shell', run: 'always', inline: start_script1
   end
 <?php
