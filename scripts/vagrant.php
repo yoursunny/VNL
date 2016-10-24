@@ -29,13 +29,6 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 ip link set dev eth1 mtu 2000
 ip route add 239.207.49.0/24 dev eth1
 
-if [ `hostname` = 'gateway' ]
-then
-  ip route add 10.192.144.0/26 via 192.168.56.1
-  ip route add 10.192.144.64/26 via 192.168.56.1
-  ip route add 192.12.69.0/24 via 192.168.56.1
-fi
-
 rsync --verbose --archive --delete -z --copy-links --include=*.sh --include=*.pubkey --include=*.pvtkey --exclude=* /vagrant/ /home/vnl/topo/
 chown -R vnlmaster:vnl /home/vnl
 
@@ -46,6 +39,13 @@ do
 done
 
 exit 0
+EOT
+
+# routes for Arizona Computer Science
+start_script2 = <<EOT
+ip route add 10.192.144.0/26 via 192.168.56.1
+ip route add 10.192.144.64/26 via 192.168.56.1
+ip route add 192.12.69.0/24 via 192.168.56.1
 EOT
 
 Vagrant.configure(2) do |config|
@@ -86,6 +86,13 @@ foreach ($tt->hosts as $tthost) {
     host.vm.provision 'shell', inline: provision_script1
     host.vm.provision 'file', source: '../../guest-apps/build/apps', destination: '/home/vnl/'
     host.vm.provision 'shell', run: 'always', inline: start_script1
+<?php
+  if ($tthost->mode == TopoTplHost::GATEWAY) {
+?>
+    host.vm.provision 'shell', run: 'always', inline: start_script2
+<?php
+  }
+?>
   end
 <?php
 }
