@@ -2,6 +2,7 @@
 #include <arpa/inet.h>
 
 bool vnlif_parse(struct vnlif* result, char* input) {
+  memset(result, 0, sizeof(*result));
   char p[160]; char* token;
   strncpy(p, input, 160);
 

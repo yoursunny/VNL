@@ -1,2 +1,3 @@
 .vagrant
 deployments
+.DS_Store
